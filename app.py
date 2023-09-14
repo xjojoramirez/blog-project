@@ -7,7 +7,7 @@ def index():
 	mountains = ['everest','k2','k3']
 	return render_template('index.html', mountain=mountains)
 
-@app.route('/mountains/<mt>')
+@app.route('/mountain/<mt>')
 def mountain(mt):
 	return "This is " + str(mt)
 
