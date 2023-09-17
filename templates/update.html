@@ -14,7 +14,7 @@
     <h1>Update user</h1>
     <br/><br/>
     {% for our_user in our_users %}
-        {{ our_user.id }} - {{ our_user.name }} - {{ our_user.email}} <br/>
+        {{ our_user.id }} - {{ our_user.name }} - {{ our_user.email}} - {{ our_user.hobby }} <br/>
     {% endfor %}
     
 {% else %} 
@@ -29,6 +29,9 @@
             <br/>
             {{ form.email.label(class="form-label") }}
             {{ form.email(class="form-control", value=name_to_update.email) }}
+            <br/>
+            {{ form.hobby.label(class="form-label") }}
+            {{ form.hobby(class="form-control", value=name_to_update.hobby) }}
             <br/>
             {{ form.submit(class="btn btn-secondary") }}
         </form>

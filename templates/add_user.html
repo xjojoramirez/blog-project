@@ -16,7 +16,7 @@
     <table class="table table-striped table-hover table-bordered">
         {% for our_user in our_users %}
         <tr>
-            <td>{{ our_user.id }} - {{ our_user.name }} - {{ our_user.email}}</td>
+            <td>{{ our_user.id }} - {{ our_user.name }} - {{ our_user.email}} - {{ our_user.hobby }}</td>
         </tr>
         {% endfor %}
     </table>
@@ -32,7 +32,11 @@
             {{ form.email.label(class="form-label") }}
             {{ form.email(class="form-control") }}
             <br/>
+            {{ form.hobby.label(class="form-label") }}
+            {{ form.hobby(class="form-control") }}
+            <br/>
             {{ form.submit(class="btn btn-secondary") }}
+            
         </form>
     </div>
    
@@ -41,7 +45,7 @@
     <table class="table table-striped table-hover table-bordered">
         {% for our_user in our_users %}
         <tr>
-            <td>{{ our_user.id }}. <a href="{{url_for('update', id=our_user.id)}}" >{{ our_user.name }}</a> - {{ our_user.email}}</td>
+            <td>{{ our_user.id }}. <a href="{{url_for('update', id=our_user.id)}}" >{{ our_user.name }}</a> - {{ our_user.email}} - {{ our_user.hobby }}</td>
         </tr>
         {% endfor %}
     </table>

@@ -4,6 +4,7 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask_migrate import Migrate
 
 
 #create flask instance
@@ -16,6 +17,7 @@ app.config['SECRET_KEY'] = "wwqrxqqqry"
 
 #initialize db
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 app.app_context().push()
 
@@ -26,6 +28,7 @@ class Users(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(100), nullable=False)
 	email = db.Column(db.String(100), nullable=False, unique=True)
+	hobby = db.Column(db.String(100))
 	date_added = db.Column(db.DateTime, default=datetime.utcnow)
 
 	#create a string
@@ -36,6 +39,7 @@ class Users(db.Model):
 class UserForm(FlaskForm):
 	name = StringField("Name", validators = [DataRequired()])
 	email = StringField("Email", validators = [DataRequired()])
+	hobby = StringField("Hobby")
 	submit = SubmitField("Submit")
 
 #update db record
@@ -46,6 +50,7 @@ def update(id):
 	if request.method == "POST":
 		name_to_update.name = request.form['name']
 		name_to_update.email = request.form['email']
+		name_to_update.hobby = request.form['hobby']
 		try:
 			db.session.commit() 
 			flash("User updated successfully!")
@@ -72,12 +77,13 @@ def add_user():
 	if form.validate_on_submit():
 		user = Users.query.filter_by(email=form.email.data).first()
 		if user is None:
-			user = Users(name=form.name.data, email=form.email.data)
+			user = Users(name=form.name.data, email=form.email.data, hobby=form.hobby.data)
 			db.session.add(user)
 			db.session.commit()
 		name = form.name.data
 		form.name.data = ''
 		form.email.data = ''
+		form.hobby.data = ''
 		flash('User added successfully!')
 	our_users = Users.query.order_by(Users.date_added)
 	return render_template('add_user.html', 
