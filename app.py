@@ -34,7 +34,30 @@ class Users(db.Model):
 	#create a string
 	def __repr__(self):
 		return '<Name %r>' % self.name
+	
 
+#delete
+@app.route('/delete/<int:id>', methods=['GET', 'POST'])
+def delete(id):
+	user_to_delete = Users.query.get_or_404(id)
+	our_users = Users.query.order_by(Users.date_added)
+	name = None
+	form = UserForm()
+	try:
+		db.session.delete(user_to_delete)
+		db.session.commit()
+		flash("User deleted successfully!")
+		return render_template('add_user.html', 
+			form = form,
+			name = name,
+			our_users=our_users)
+	except:
+		flash("Error deleting user!")
+		return render_template('add_user.html', 
+			form = form,
+			name = name,
+			our_users=our_users)
+	
 #create form class 
 class UserForm(FlaskForm):
 	name = StringField("Name", validators = [DataRequired()])
@@ -65,7 +88,8 @@ def update(id):
 	else:
 		return render_template("update.html", 
 				form=form, 
-				name_to_update=name_to_update)
+				name_to_update=name_to_update,
+				id=id)
 
 
 
