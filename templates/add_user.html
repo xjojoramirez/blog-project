@@ -35,6 +35,14 @@
             {{ form.hobby.label(class="form-label") }}
             {{ form.hobby(class="form-control") }}
             <br/>
+
+            {{ form.passw_hash.label(class="form-label") }}
+            {{ form.passw_hash(class="form-control") }}
+            <br/>
+
+            {{ form.passw_hash2.label(class="form-label") }}
+            {{ form.passw_hash2(class="form-control") }}
+            <br/>
             {{ form.submit(class="btn btn-secondary") }}
             
         </form>
@@ -48,7 +56,7 @@
             <td>{{ our_user.id }}. 
                 <a href="{{url_for('update', id=our_user.id)}}" >{{ our_user.name }}</a> - 
                 {{ our_user.email}} - 
-                {{ our_user.hobby }} -
+                {{ our_user.hobby }} - 
                 <a href="{{url_for('delete', id=our_user.id)}}" >Delete</a> 
             </td>
         </tr>

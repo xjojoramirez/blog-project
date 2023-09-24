@@ -1,11 +1,13 @@
-from flask import Flask, render_template, flash, request
+from flask import Flask, render_template, flash, request, redirect, url_for
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError
+from wtforms.validators import DataRequired, EqualTo
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_migrate import Migrate
-
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import date
+from wtforms.widgets import TextArea
 
 #create flask instance
 app = Flask(__name__)
@@ -21,6 +23,111 @@ migrate = Migrate(app, db)
 
 app.app_context().push()
 
+#Create a Blog Post model
+class Posts(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	title = db.Column(db.String(255))
+	content = db.Column(db.Text)
+	author = db.Column(db.String(255))
+	date_posted = db.Column(db.DateTime, default=datetime.utcnow)
+	slug = db.Column(db.String(255))
+
+#Create a Post Form
+class PostForm(FlaskForm):
+	title = StringField("Title", validators=[DataRequired()])
+	content = StringField("Content", validators=[DataRequired()], widget=TextArea())
+	author = StringField("Author", validators=[DataRequired()])
+	slug = StringField("Slug", validators=[DataRequired()])
+	submit = SubmitField("Submit")
+
+@app.route('/posts')
+def posts():
+	# Grab all the posts from db
+	posts = Posts.query.order_by(Posts.date_posted)
+	return render_template("posts.html", posts = posts)
+
+#Add Post Page
+@app.route('/add-post',methods=['GET', 'POST'])
+def add_post():
+	form = PostForm()
+
+	if form.validate_on_submit():
+		post = Posts(
+			title = form.title.data,
+			content = form.content.data,
+			author = form.author.data,
+			slug = form.slug.data
+		)
+		#clear the form
+		form.title.data = ''
+		form.content.data = ''
+		form.author.data = ''
+		form.slug.data = ''
+
+		#Add post data to database
+		db.session.add(post)
+		db.session.commit()
+
+		# return a message
+		flash("Blog Post Submitted Successfully!")
+
+	#redirect to the webpage
+	return render_template("add_post.html", form=form)
+
+# create individual post page
+@app.route('/posts/<int:id>')
+def post(id):
+	post = Posts.query.get_or_404(id) 
+	return render_template('post.html', post=post)
+
+# create edit post page
+@app.route('/posts/edit/<int:id>', methods=['GET', 'POST'])
+def edit_post(id):
+	post = Posts.query.get_or_404(id) 
+	form = PostForm()
+	if form.validate_on_submit():
+		post.title = form.title.data
+		post.author = form.author.data
+		post.slug = form.slug.data
+		post.content = form.content.data
+
+		# Update db
+		db.session.add(post)
+		db.session.commit()
+		flash("Post Has Been Update!")
+
+		return redirect(url_for('post', id=post.id))
+	
+	form.title.data = post.title
+	form.author.data = post.author
+	form.slug.data = post.slug
+	form.content.data = post.content
+
+	return render_template('edit_post.html', form=form)
+
+# delete post
+@app.route('/posts/delete/<int:id>', methods =['GET', 'POST'])
+def delete_post(id):
+	post_to_delete = Posts.query.get_or_404(id)
+
+	try:	
+		db.session.delete(post_to_delete)
+		db.session.commit()
+
+		flash("Blog post deleted!")
+		posts = Posts.query.order_by(Posts.date_posted)
+		return render_template("posts.html", posts = posts)
+	except:
+		flash("Error deleting post!")
+		posts = Posts.query.order_by(Posts.date_posted)
+		return render_template("posts.html", posts = posts)
+
+# JSON Thing
+@app.route('/date')
+def get_current_date():
+	return {"Date":date.today()}
+
+
 
 
 #create model
@@ -30,6 +137,20 @@ class Users(db.Model):
 	email = db.Column(db.String(100), nullable=False, unique=True)
 	hobby = db.Column(db.String(100))
 	date_added = db.Column(db.DateTime, default=datetime.utcnow)
+
+	#passw stuff!
+	passw_hash = db.Column(db.String(128))
+
+	@property
+	def password(self):
+		raise AttributeError('password is not a readable attribute!')
+	
+	@password.setter
+	def password(self, password):
+		self.password_hash = generate_password_hash(password)
+	
+	def verify_password(self, password):
+		return check_password_hash(self.password_hash, password)
 
 	#create a string
 	def __repr__(self):
@@ -64,6 +185,8 @@ class UserForm(FlaskForm):
 	email = StringField("Email", validators = [DataRequired()])
 	hobby = StringField("Hobby")
 	submit = SubmitField("Submit")
+	passw_hash = PasswordField('Password', validators = [DataRequired(), EqualTo('passw_hash2', message='Password must be identical!')]) 
+	passw_hash2 = PasswordField('Confirm Password', validators=[DataRequired()])
 
 #update db record
 @app.route('/update/<int:id>', methods = ['GET', 'POST'])
@@ -91,7 +214,10 @@ def update(id):
 				name_to_update=name_to_update,
 				id=id)
 
-
+class PasswordForm(FlaskForm):
+	email = StringField("What's your Email", validators=[DataRequired()])
+	password_hash = PasswordField("What's your Password", validators=[DataRequired()])
+	submit = SubmitField("Submit")
 
 
 @app.route('/user/add', methods=['GET', 'POST'])
@@ -101,13 +227,16 @@ def add_user():
 	if form.validate_on_submit():
 		user = Users.query.filter_by(email=form.email.data).first()
 		if user is None:
-			user = Users(name=form.name.data, email=form.email.data, hobby=form.hobby.data)
+			# hash passw!
+			hashed_pw = generate_password_hash(form.passw_hash.data, "sha256")
+			user = Users(name=form.name.data, email=form.email.data, hobby=form.hobby.data, passw_hash = hashed_pw)
 			db.session.add(user)
 			db.session.commit()
 		name = form.name.data
 		form.name.data = ''
 		form.email.data = ''
 		form.hobby.data = ''
+		form.passw_hash = ''
 		flash('User added successfully!')
 	our_users = Users.query.order_by(Users.date_added)
 	return render_template('add_user.html', 
@@ -141,6 +270,37 @@ def page_not_found(error):
 @app.errorhandler(500)
 def page_not_found(error):
 	return render_template('500.html'), 500
+
+#create password test
+@app.route('/test_pw', methods=['GET', 'POST'])
+def test_pw():
+	email = None
+	password = None
+	pw_to_check = None
+	passed = None
+
+	form = PasswordForm()
+	#validate
+	if form.validate_on_submit():
+		email = form.email.data
+		password = form.password_hash.data
+		form.email.data = ''
+		form.password_hash.data = ''
+		
+		#lookup user by email
+		pw_to_check = Users.query.filter_by(email=email).first()
+		
+		# check hashed passw
+		passed = check_password_hash(pw_to_check.passw_hash, password)
+
+
+	return render_template('test_pw.html',
+		email = email,
+		password = password,
+		pw_to_check = pw_to_check,
+		passed = passed,
+		form = form)
+
 
 #create name page
 @app.route('/name', methods=['GET', 'POST'])
