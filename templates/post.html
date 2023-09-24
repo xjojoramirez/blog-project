@@ -3,7 +3,7 @@
 {% block content %}
 
 {% for message in get_flashed_messages() %}
-    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+    <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">
         {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -19,9 +19,10 @@
     {{ post.content }}<br/><br/>
    
 </div>
-
-<a href = "{{url_for('edit_post', id=post.id)}}" class="btn btn-outline-secondary btn-sm">Edit Post</a>
-<a href = "{{url_for('delete_post', id=post.id)}}" class="btn btn-outline-danger btn-sm">Delete Post</a>
+{% if current_user.is_authenticated %}
+    <a href = "{{url_for('edit_post', id=post.id)}}" class="btn btn-outline-secondary btn-sm">Edit Post</a>
+    <a href = "{{url_for('delete_post', id=post.id)}}" class="btn btn-outline-danger btn-sm">Delete Post</a>
+{% endif %} 
 <a href = "{{url_for('posts')}}" class="btn btn-outline-secondary btn-sm">Back To Posts</a>
 
 {% endblock %}

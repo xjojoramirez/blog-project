@@ -8,6 +8,7 @@ from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date
 from wtforms.widgets import TextArea
+from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
 #create flask instance
 app = Flask(__name__)
@@ -22,6 +23,55 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 app.app_context().push()
+
+# Flask_login stuff
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(user_id):
+	return Users.query.get(int(user_id))
+	
+
+# Create Login Form
+class LoginForm(FlaskForm):
+	username = StringField("Username", validators=[DataRequired()])
+	password = PasswordField("Password", validators=[DataRequired()])
+	submit = SubmitField("Submit")
+# Create Login Page
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+	form = LoginForm()
+	if form.validate_on_submit():
+		user = Users.query.filter_by(username=form.username.data).first()
+		if user:
+			# check the hash
+			if check_password_hash(user.passw_hash, form.password.data):
+				login_user(user)
+				flash("Login Succesfull")
+				return redirect(url_for('dashboard'))
+			else:
+				flash("Error loggin in!")
+		else:
+			flash("User doesnt exist!")
+
+	return render_template('login.html', form=form)
+
+# create logout
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+	logout_user()
+	flash("You have been logged out!")
+	return redirect(url_for('login'))
+
+# Create Dashboard Page
+@app.route('/dashboard', methods=['GET', 'POST'])
+@login_required
+def dashboard():
+	form = LoginForm()
+	return render_template('dashboard.html')
 
 #Create a Blog Post model
 class Posts(db.Model):
@@ -48,6 +98,7 @@ def posts():
 
 #Add Post Page
 @app.route('/add-post',methods=['GET', 'POST'])
+@login_required
 def add_post():
 	form = PostForm()
 
@@ -82,6 +133,7 @@ def post(id):
 
 # create edit post page
 @app.route('/posts/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
 def edit_post(id):
 	post = Posts.query.get_or_404(id) 
 	form = PostForm()
@@ -131,10 +183,13 @@ def get_current_date():
 
 
 #create model
-class Users(db.Model):
+class Users(db.Model, UserMixin):
 	id = db.Column(db.Integer, primary_key=True)
+	
+	username = db.Column(db.String(20), nullable=False, unique=True, name='unique_username_constraint')
+
 	name = db.Column(db.String(100), nullable=False)
-	email = db.Column(db.String(100), nullable=False, unique=True)
+	email = db.Column(db.String(100), nullable=False, unique=True, name='unique_email_constraint')
 	hobby = db.Column(db.String(100))
 	date_added = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -182,6 +237,7 @@ def delete(id):
 #create form class 
 class UserForm(FlaskForm):
 	name = StringField("Name", validators = [DataRequired()])
+	username = StringField("Username", validators = [DataRequired()])
 	email = StringField("Email", validators = [DataRequired()])
 	hobby = StringField("Hobby")
 	submit = SubmitField("Submit")
@@ -229,11 +285,16 @@ def add_user():
 		if user is None:
 			# hash passw!
 			hashed_pw = generate_password_hash(form.passw_hash.data, "sha256")
-			user = Users(name=form.name.data, email=form.email.data, hobby=form.hobby.data, passw_hash = hashed_pw)
+			user = Users(username=form.username.data,
+						name=form.name.data, 
+						email=form.email.data, 
+						hobby=form.hobby.data, 
+						passw_hash = hashed_pw)
 			db.session.add(user)
 			db.session.commit()
 		name = form.name.data
 		form.name.data = ''
+		form.username.data = ''
 		form.email.data = ''
 		form.hobby.data = ''
 		form.passw_hash = ''
