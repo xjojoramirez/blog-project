@@ -49,7 +49,7 @@ def login():
 			# check the hash
 			if check_password_hash(user.passw_hash, form.password.data):
 				login_user(user)
-				flash("Login Succesfull")
+				flash("Login Succesful")
 				return redirect(url_for('dashboard'))
 			else:
 				flash("Error loggin in!")
