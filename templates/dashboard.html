@@ -14,7 +14,7 @@
     <br/>
     <div class="card">
         <div class="card-header">
-            {{ current_user.name }}
+            <h4>{{ current_user.name }}</h4>
         </div>
         <div class="card-body">
           <h5 class="card-title">Welcome to your user dashboard</h5>
@@ -30,8 +30,37 @@
 
           </p>
           <a href="{{url_for('logout')}}" class="btn btn-secondary btn-small">Logout</a>
+          <a href="{{url_for('update', id=current_user.id)}}" class="btn btn-secondary btn-small" >Update</a>
+          <a href="{{url_for('delete', id=current_user.id)}}" class="btn btn-danger">Delete</a>
         </div>
       </div>
+<br/>
+      <div class="card">
+      <div class="card-header">
+            <h4>Update user</h4>
+        </div>    
+            <div class="shadow p-3 bg-body rounded">
+                <form action="/dashboard" method="POST">
+                    {{ form.hidden_tag() }}
+        
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-control", value=name_to_update.name) }}
+                    <br/>
+                    {{ form.username.label(class="form-label") }}
+                    {{ form.username(class="form-control", value=name_to_update.username) }}
+                    <br/>
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control", value=name_to_update.email) }}
+                    <br/>
+                    {{ form.hobby.label(class="form-label") }}
+                    {{ form.hobby(class="form-control", value=name_to_update.hobby) }}
+                    <br/>
+                    {{ form.submit(class="btn btn-secondary") }}
+        
+                </form>
+            </div>
+      </div>
+
 
 
 {% endblock %}

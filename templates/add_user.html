@@ -57,8 +57,9 @@
         {% for our_user in our_users %}
         <tr>
             <td>{{ our_user.id }}. 
-                <!-- <a href="{{url_for('update', id=our_user.id)}}" >{{ our_user.name }}</a> -  -->
-                {{ our_user.name }} -
+               
+                <a  {% if current_user.is_authenticated %} href="{{url_for('update', id=our_user.id)}}" {% endif %}>{{ our_user.name }}</a> -
+               
                 {{ our_user.username }} 
                 {% if current_user.is_authenticated %}
                     <a href="{{url_for('delete', id=our_user.id)}}" > - Delete</a> 
