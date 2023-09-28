@@ -13,25 +13,36 @@
     <h2>Dashboard</h2>
     <br/>
     <div class="card">
+       
         <div class="card-header">
             <h4>{{ current_user.name }}</h4>
         </div>
         <div class="card-body">
           <h5 class="card-title">Welcome to your user dashboard</h5>
-          <p class="card-text">
+       
+            <div class="container card-text">
+                <div class="row">
+                    <div class="col-8">
+                        <strong>Name: </strong>{{ current_user.name }}<br/>
+                        <strong>Username: </strong>{{ current_user.username }}<br/>
+                        <strong>User Id: </strong>{{ current_user.id }}<br/>
+                        <strong>Email: </strong>{{ current_user.email }}<br/>
+                        <strong>Hobby: </strong>{{ current_user.hobby }}<br/>
+                        <strong>About author: </strong>{{ current_user.about_author }}<br/>
+                        <strong>Date Joined: </strong>{{ current_user.date_added }}<br/><br/>
+            
+                    <a href="{{url_for('logout')}}" class="btn btn-secondary btn-small">Logout</a>
+                    <a href="{{url_for('update', id=current_user.id)}}" class="btn btn-secondary btn-small" >Update</a>
+                    <a href="{{url_for('delete', id=current_user.id)}}" class="btn btn-danger">Delete</a>
+                    </div>
+                   
+                </div>
+            </div>
+      
 
-            <strong>Name: </strong>{{ current_user.name }}<br/>
-            <strong>Username: </strong>{{ current_user.username }}<br/>
-            <strong>User Id: </strong>{{ current_user.id }}<br/>
-            <strong>Email: </strong>{{ current_user.email }}<br/>
-            <strong>Hobby: </strong>{{ current_user.hobby }}<br/>
-            <strong>Date Joined:</strong>{{ current_user.date_added }}<br/>
+           
 
-
-          </p>
-          <a href="{{url_for('logout')}}" class="btn btn-secondary btn-small">Logout</a>
-          <a href="{{url_for('update', id=current_user.id)}}" class="btn btn-secondary btn-small" >Update</a>
-          <a href="{{url_for('delete', id=current_user.id)}}" class="btn btn-danger">Delete</a>
+          
         </div>
       </div>
 <br/>
@@ -55,7 +66,14 @@
                     {{ form.hobby.label(class="form-label") }}
                     {{ form.hobby(class="form-control", value=name_to_update.hobby) }}
                     <br/>
+
+                    {{ form.about_author.label(class="form-label") }}
+                    <textarea name="about_author" class="form-control">{{ name_to_update.about_author }}</textarea>
+                    <br/>
+                    
                     {{ form.submit(class="btn btn-secondary") }}
+
+                    
         
                 </form>
             </div>

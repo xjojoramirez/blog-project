@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError
+from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError, TextAreaField
 from wtforms.validators import DataRequired, EqualTo
 from wtforms.widgets import TextArea
 from flask_ckeditor import CKEditorField
@@ -30,6 +30,7 @@ class UserForm(FlaskForm):
 	username = StringField("Username", validators = [DataRequired()])
 	email = StringField("Email", validators = [DataRequired()])
 	hobby = StringField("Hobby")
+	about_author = TextAreaField("About Author")
 	submit = SubmitField("Submit")
 	passw_hash = PasswordField('Password', validators = [DataRequired(), EqualTo('passw_hash2', message='Password must be identical!')]) 
 	passw_hash2 = PasswordField('Confirm Password', validators=[DataRequired()])

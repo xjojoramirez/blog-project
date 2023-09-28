@@ -105,6 +105,7 @@ def dashboard():
 		name_to_update.email = request.form['email']
 		name_to_update.hobby = request.form['hobby']
 		name_to_update.username = request.form['username']
+		name_to_update.about_author = request.form['about_author']
 		try:
 			db.session.commit() 
 			flash("User updated successfully!")
@@ -258,6 +259,7 @@ def update(id):
 		name_to_update.email = request.form['email']
 		name_to_update.hobby = request.form['hobby']
 		name_to_update.username = request.form['username']
+		name_to_update.about_author = request.form['username']
 		try:
 			db.session.commit() 
 			flash("User updated successfully!")
@@ -403,6 +405,7 @@ class Users(db.Model, UserMixin):
 	name = db.Column(db.String(100), nullable=False)
 	email = db.Column(db.String(100), nullable=False, unique=True, name='unique_email_constraint')
 	hobby = db.Column(db.String(100))
+	about_author = db.Column(db.Text(500), nullable=True)
 	date_added = db.Column(db.DateTime, default=datetime.utcnow)
 
 	#passw stuff!
