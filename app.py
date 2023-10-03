@@ -235,7 +235,7 @@ def delete_post(id):
 	post_to_delete = Posts.query.get_or_404(id)
 	id = current_user.id
 
-	if id == post_to_delete.poster.id:
+	if id == post_to_delete.poster.id or id == 1:
 		try:	
 			db.session.delete(post_to_delete)
 			db.session.commit()
@@ -260,7 +260,7 @@ def get_current_date():
 @app.route('/delete/<int:id>')
 @login_required
 def delete(id):
-	if id == current_user.id:
+	if id == current_user.id or id == 1:
 		user_to_delete = Users.query.get_or_404(id)
 		our_users = Users.query.order_by(Users.date_added)
 		name = None
