@@ -235,22 +235,19 @@ def delete_post(id):
 	post_to_delete = Posts.query.get_or_404(id)
 	id = current_user.id
 
-	if id == post_to_delete.poster.id or id == 1:
-		try:	
-			db.session.delete(post_to_delete)
-			db.session.commit()
 
-			flash("Blog post deleted!")
-			posts = Posts.query.order_by(Posts.date_posted)
-			return render_template("posts.html", posts = posts)
-		except:
-			flash("Error deleting post!")
-			posts = Posts.query.order_by(Posts.date_posted)
-			return render_template("posts.html", posts = posts)
-	else:
-		flash("You can't delete this post!")
+	try:	
+		db.session.delete(post_to_delete)
+		db.session.commit()
+
+		flash("Blog post deleted!")
 		posts = Posts.query.order_by(Posts.date_posted)
 		return render_template("posts.html", posts = posts)
+	except:
+		flash("Error deleting post!")
+		posts = Posts.query.order_by(Posts.date_posted)
+		return render_template("posts.html", posts = posts)
+
 # JSON Thing
 @app.route('/date')
 def get_current_date():
