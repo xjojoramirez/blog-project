@@ -11,7 +11,7 @@
         <div class="shadow p-3 mb-5 bg-body rounded">
             <h3>{{ post.title }}</h3>
             <small>By: {{ post.poster.name }} | {{ post.date_posted }}</small><br/><br/>
-            {{ post.content|safe }}<br/><br/>
+            <span class="truncate-text">{{ post.content|safe }}</span><br/><br/>
             <a href = "{{url_for('post', id=post.id)}}" class="btn btn-outline-secondary btn-sm">View Post</a>
             
             {% if current_user.is_authenticated and post.poster_id == current_user.id %}
@@ -20,8 +20,6 @@
             {% endif%}
             
         </div>
-
-            
 
         {% endfor %}
     {% else %}

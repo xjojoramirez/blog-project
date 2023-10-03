@@ -9,24 +9,48 @@
     </div>
 {% endfor %}
 
-<h1>Blog Posts...</h1>
+<h1>{{ post.title }}</h1>
 <br/>
 
 
-<div class="shadow p-3 mb-5 bg-body rounded">
+<div class="shadow p-5 mb-5 bg-body rounded">
     <h3>{{ post.title }}</h3>
-    <small>By: {{ post.poster.name }} | {{ post.date_posted }}</small><br/><br/>
+    <small>By: {{ post.poster.name }} | {{ post.date_posted | datetimefilter('%Y-%m-%d')}}</small><br/><br/>
     {{ post.content|safe }}<br/>
-    
-    {% if post.poster.about_author %}
-        {{ post.poster.about_author }}
-    {% endif %}
-   
+    <hr>
+
+      <div class="container">
+        <div class="row">
+            <div class="col-md-2">
+                {% if post.poster.profile_pic %}
+                    <img class="float-end rounded-custom" src="{{ url_for('static', filename='images/'+ post.poster.profile_pic) }}" width="150">
+                {% else %}
+                    <img class="float-end" src="{{ url_for('static', filename='images/default_profile.png') }}" width="150">
+                {% endif %}
+            </div>
+            <div class="col-md-10">
+                <div class="card-body">
+                    <p>Published by:</p>
+                    <h5 class="card-title">
+                        {{post.poster.name}}
+                    </h5>
+                    <p class="card-text"> 
+                        {% if post.poster.about_author %}
+                            {{ post.poster.about_author }}
+                        {% else %}
+                            Author has no about profile yet...
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% if current_user.is_authenticated and post.poster_id == current_user.id %}
     <a href = "{{url_for('edit_post', id=post.id)}}" class="btn btn-outline-secondary btn-sm">Edit Post</a>
     <a href = "{{url_for('delete_post', id=post.id)}}" class="btn btn-outline-danger btn-sm">Delete Post</a>
 {% endif %} 
-<a href = "{{url_for('posts')}}" class="btn btn-outline-secondary btn-sm">Back To Posts</a>
+<a href = "{{url_for('posts')}}" class="btn btn-outline-secondary btn-sm">Back To Posts</a><br/><br/><br/>
 
 {% endblock %}

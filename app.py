@@ -7,6 +7,9 @@ from datetime import date
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from webforms import LoginForm, PostForm, UserForm, PasswordForm, SearchForm, NamerForm
 from flask_ckeditor import CKEditor
+from werkzeug.utils import secure_filename
+import uuid as uuid
+import os
 
 #create flask instance
 app = Flask(__name__)
@@ -18,6 +21,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 
 #sample secret key
 app.config['SECRET_KEY'] = "wwqrxqqqry"
+
+UPLOAD_FOLDER = 'static/images/'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 #initialize db
 db = SQLAlchemy(app)
@@ -106,21 +112,45 @@ def dashboard():
 		name_to_update.hobby = request.form['hobby']
 		name_to_update.username = request.form['username']
 		name_to_update.about_author = request.form['about_author']
-		try:
+
+		# Check for profile pic
+		if request.files['profile_pic']:
+			name_to_update.profile_pic = request.files['profile_pic']	
+
+			# Grab Image Name
+			pic_filename = secure_filename(name_to_update.profile_pic.filename)
+
+			# Set uuid
+			pic_name = str(uuid.uuid1()) + "_" + pic_filename
+
+			# Save image
+			saver = request.files['profile_pic']
+			
+			# Change it to a string to save to db 
+			name_to_update.profile_pic = pic_name
+			
+			try:
+				db.session.commit() 
+				saver.save(os.path.join(app.config['UPLOAD_FOLDER'], pic_name))
+				flash("User updated successfully!")
+				return render_template("dashboard.html", 
+					form=form, 
+					name_to_update = name_to_update)
+			except:
+				flash("Error updating the record!")
+				return render_template("dashboard.html", 
+					form=form, 
+					name_to_update = name_to_update)
+		else:
 			db.session.commit() 
 			flash("User updated successfully!")
-			return render_template("dashboard.html", 
-				form=form, 
-				name_to_update=name_to_update)
-		except:
-			flash("Error updating the record!")
-			return render_template("dashboard.html", 
-				form=form, 
-				name_to_update=name_to_update)
+			return render_template("dashboard.html",
+						  form=form,
+						  name_to_update = name_to_update)
 	else:
 		return render_template("dashboard.html", 
 				form=form, 
-				name_to_update=name_to_update,
+				name_to_update = name_to_update,
 				id=id)
 
 # Create posts page
@@ -226,27 +256,32 @@ def delete_post(id):
 def get_current_date():
 	return {"Date":date.today()}
 
-#delete a post
-@app.route('/delete/<int:id>', methods=['GET', 'POST'])
+#delete user
+@app.route('/delete/<int:id>')
+@login_required
 def delete(id):
-	user_to_delete = Users.query.get_or_404(id)
-	our_users = Users.query.order_by(Users.date_added)
-	name = None
-	form = UserForm()
-	try:
-		db.session.delete(user_to_delete)
-		db.session.commit()
-		flash("User deleted successfully!")
-		return render_template('add_user.html', 
-			form = form,
-			name = name,
-			our_users=our_users)
-	except:
-		flash("Error deleting user!")
-		return render_template('add_user.html', 
-			form = form,
-			name = name,
-			our_users=our_users)
+	if id == current_user.id:
+		user_to_delete = Users.query.get_or_404(id)
+		our_users = Users.query.order_by(Users.date_added)
+		name = None
+		form = UserForm()
+		try:
+			db.session.delete(user_to_delete)
+			db.session.commit()
+			flash("User deleted successfully!")
+			return render_template('add_user.html', 
+				form = form,
+				name = name,
+				our_users=our_users)
+		except:
+			flash("Error deleting user!")
+			return render_template('add_user.html', 
+				form = form,
+				name = name,
+				our_users=our_users)
+	else:
+		flash("Sorry, you can't delete this user!")
+		return redirect(url_for('dashboard'))
 	
 #update user
 @app.route('/update/<int:id>', methods = ['GET', 'POST'])
@@ -309,11 +344,18 @@ def add_user():
 			name = name,
 			our_users=our_users)
 
+# Custom Jinja2 filter for formatting datetime objects
+@app.template_filter('datetimefilter')
+def format_datetime(value, format='%Y-%m-%d %H:%M:%S'):
+    if value is None:
+        return ''
+    return value.strftime(format)	
+
 # index route
 @app.route('/')
 def index():
-	mountains = ['everest','k2','k3']
-	return render_template('index.html', mountain=mountains)
+	posts = Posts.query.order_by(Posts.date_posted)
+	return render_template('index.html', posts=posts)
 
 @app.route('/mountain/<mt>')
 def mountain(mt):
@@ -407,6 +449,7 @@ class Users(db.Model, UserMixin):
 	hobby = db.Column(db.String(100))
 	about_author = db.Column(db.Text(500), nullable=True)
 	date_added = db.Column(db.DateTime, default=datetime.utcnow)
+	profile_pic = db.Column(db.String(), nullable=True)
 
 	#passw stuff!
 	passw_hash = db.Column(db.String(128))

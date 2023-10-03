@@ -1,3 +1,30 @@
 body {
     background: #f4f4f4;
 }
+
+.truncate-text {
+
+    /* Add ellipsis to multi-line text */
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* Number of lines to display before truncating */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  a.card-title-link{
+    text-decoration: none;
+    color: unset;
+  }
+  a.card-title-link:hover{
+    text-decoration: underline;
+    outline: none;
+  }
+
+  .rounded-custom {
+    object-fit: cover;
+    width: 120px;
+    height: 120px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 50%;
+}

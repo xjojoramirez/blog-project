@@ -29,11 +29,19 @@
                         <strong>Email: </strong>{{ current_user.email }}<br/>
                         <strong>Hobby: </strong>{{ current_user.hobby }}<br/>
                         <strong>About author: </strong>{{ current_user.about_author }}<br/>
+                        <strong>Profile picture: </strong>{{ current_user.profile_pic }}<br/>
                         <strong>Date Joined: </strong>{{ current_user.date_added }}<br/><br/>
             
                     <a href="{{url_for('logout')}}" class="btn btn-secondary btn-small">Logout</a>
                     <a href="{{url_for('update', id=current_user.id)}}" class="btn btn-secondary btn-small" >Update</a>
                     <a href="{{url_for('delete', id=current_user.id)}}" class="btn btn-danger">Delete</a>
+                    </div>
+                    <div class="col-4">
+                        {% if current_user.profile_pic %}
+                            <img class="float-end" src="{{ url_for('static', filename='images/'+ current_user.profile_pic) }}" width="150">
+                        {% else %}
+                            <img class="float-end" src="{{ url_for('static', filename='images/default_profile.png') }}" width="150">
+                        {% endif %}
                     </div>
                    
                 </div>
@@ -51,7 +59,7 @@
             <h4>Update user</h4>
         </div>    
             <div class="shadow p-3 bg-body rounded">
-                <form action="/dashboard" method="POST">
+                <form action="/dashboard" method="POST" enctype="multipart/form-data">
                     {{ form.hidden_tag() }}
         
                     {{ form.name.label(class="form-label") }}
@@ -69,6 +77,10 @@
 
                     {{ form.about_author.label(class="form-label") }}
                     <textarea name="about_author" class="form-control">{{ name_to_update.about_author }}</textarea>
+                    <br/>
+
+                    {{ form.profile_pic.label(class="form-label") }}
+                    {{ form.profile_pic(class="form-control", value=name_to_update.profile_pic) }}
                     <br/>
                     
                     {{ form.submit(class="btn btn-secondary") }}

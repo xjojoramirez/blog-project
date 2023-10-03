@@ -1,12 +1,5 @@
 {% extends 'base.html' %}
 {% block content %}
-<!-- <h1>Hello, world!</h1>
-<ul>
-    {% for mt in mountain %}
-    <li><a href="/mountain/{{ mt }}">{{mt}}</a></li>
-    {% endfor %}
-
-</ul> -->
 
 <style>
     .bg-custom-blueg{
@@ -17,9 +10,12 @@
 
   <div class="p-5 my-4 bg-custom-blueg rounded-3">
     <div class="container-fluid py-5">
-      <h1 class="fs-1 pb-4">Explore my journey through the "what I did" of my tasks</h1>
-      <p class="col-md-8 fs-5">Discover what I've accomplished, step by step, as I share the story of 'what I did' in a straightforward and engaging way. From problem-solving to execution, follow along and gain insights into my hands-on experiences.</p>
-      <button class="btn btn-primary btn-lg" type="button">See all posts...</button>
+      <h1 class="fs-1 pb-4">Take a look at what helps me in my tasks.</h1>
+      <p class="col-md-10 fs-5">
+        Discover what helps me in my coding journey. Explore the tools, techniques, and strategies that keep me on track and continually improving in the world of coding.
+        It suggests a shared opportunity to gain insight into the elements contributing to my productivity and efficiency.
+        </p>
+      <a href="{{url_for('posts')}}" class="btn btn-primary btn-lg" type="button">See all posts...</a>
     </div>
   </div>
 
@@ -28,56 +24,27 @@
     <div class="container">
         <h1 class="fs-3 p-2">Featured posts</h1>
       <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+        {% for post in posts %}
         <div class="col">
           <div class="card shadow-sm">
             <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
 
-            <div class="card-body">
-              <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                </div>
-                <small class="text-muted">9 mins</small>
+            <div class="card-body custom-card-body">
+              <h3 class="card-title"><a href="{{url_for('post', id=post.id)}}" class="card-title-link">{{ post.title }}</a></h3>
+              <div class="card-text truncate-text"> {{ post.content|safe }} </div>
+              
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                  <small class="text-muted">{{ post.date_posted | datetimefilter('%Y-%m-%d') }}</small>
+                  <small class="text-muted">
+                    {% if post.poster.name %}
+                    By: {{ post.poster.name }}
+                    {% endif %}
+                </small> 
               </div>
             </div>
           </div>
         </div>
-        <div class="col">
-          <div class="card shadow-sm">
-            <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
-
-            <div class="card-body">
-              <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                </div>
-                <small class="text-muted">9 mins</small>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card shadow-sm">
-            <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
-
-            <div class="card-body">
-              <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                </div>
-                <small class="text-muted">9 mins</small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
+        {% endfor %}
       </div>
     </div>
   </div>
