@@ -14,7 +14,7 @@
 
 
 <div class="shadow p-3 mb-5 bg-body rounded">
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data"> 
         {{ form.hidden_tag() }}
 
         {{ form.title.label(class="form-label") }}
@@ -22,6 +22,10 @@
         <br/>
         {{ form.slug.label(class="form-label") }}
         {{ form.slug(class="form-control") }}
+        <br/>
+
+        {{ form.post_img.label(class="form-label") }}
+        {{ form.post_img(class="form-control")}}
         <br/>
 
         {{ form.content.label(class="form-label") }}

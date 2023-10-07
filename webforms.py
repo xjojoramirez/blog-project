@@ -23,8 +23,9 @@ class PostForm(FlaskForm):
 	content = CKEditorField('Content', validators=[DataRequired()])
 	# author = StringField("Author")
 	slug = StringField("Slug", validators=[DataRequired()])
+	post_img = FileField("Post Image")
 	submit = SubmitField("Submit")
-	
+
 #create form class 
 class UserForm(FlaskForm):
 	name = StringField("Name", validators = [DataRequired()])

@@ -22,8 +22,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 #sample secret key
 app.config['SECRET_KEY'] = "wwqrxqqqry"
 
-UPLOAD_FOLDER = 'static/images/'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+USER_UPLOAD_FOLDER = 'static/images/user'
+app.config['USER_UPLOAD_FOLDER'] = USER_UPLOAD_FOLDER
+
+POST_UPLOAD_FOLDER = 'static/images/post'
+app.config['POST_UPLOAD_FOLDER'] = POST_UPLOAD_FOLDER
 
 #initialize db
 db = SQLAlchemy(app)
@@ -131,7 +134,7 @@ def dashboard():
 			
 			try:
 				db.session.commit() 
-				saver.save(os.path.join(app.config['UPLOAD_FOLDER'], pic_name))
+				saver.save(os.path.join(app.config['USER_UPLOAD_FOLDER'], pic_name))
 				flash("User updated successfully!")
 				return render_template("dashboard.html", 
 					form=form, 
@@ -208,10 +211,33 @@ def edit_post(id):
 		post.slug = form.slug.data
 		post.content = form.content.data
 
+		if form.post_img.data:
+			post.post_img = form.post_img.data
+			# Grab Image Name
+			post_filename = secure_filename(post.post_img.filename)
+			# Set uuid
+			post_uuid_filename = str(uuid.uuid1()) + "_" + post_filename
+			# Save image
+			saver = form.post_img.data
+
+			# Change it to a string to save to db 
+			post.post_img = post_uuid_filename
+
+			try:
+				db.session.commit() 
+				saver.save(os.path.join(app.config['POST_UPLOAD_FOLDER'], post_uuid_filename))
+				flash("Post updated successfully!")
+				return redirect(url_for('post', id=post.id))
+			except:
+				flash("Error updating the post!")
+				return redirect(url_for('post', id=post.id))
+
+
+
 		# Update db
 		db.session.add(post)
 		db.session.commit()
-		flash("Post Has Been Update!")
+		flash("Post Has Been Updated!")
 
 		return redirect(url_for('post', id=post.id))
 	
@@ -220,6 +246,7 @@ def edit_post(id):
 		# form.author.data = post.author
 		form.slug.data = post.slug
 		form.content.data = post.content
+		form.post_img.data = post.post_img
 
 		return render_template('edit_post.html', form=form)
 	
@@ -345,11 +372,11 @@ def add_user():
 			our_users=our_users)
 
 # Custom Jinja2 filter for formatting datetime objects
-@app.template_filter('datetimefilter')
-def format_datetime(value, format='%Y-%m-%d %H:%M:%S'):
+@app.template_filter('dateformat')
+def format_date(value, format='%b %d, %Y'):
     if value is None:
         return ''
-    return value.strftime(format)	
+    return value.strftime(format)
 
 # index route
 @app.route('/')
@@ -436,6 +463,7 @@ class Posts(db.Model):
 	#author = db.Column(db.String(255))
 	date_posted = db.Column(db.DateTime, default=datetime.utcnow)
 	slug = db.Column(db.String(255))
+	post_img = db.Column(db.String(), nullable=True)
 	# foreign key to link users (refer to primary key of the user )
 	poster_id = db.Column(db.Integer, db.ForeignKey('users.id', name='fk_posts_users'))
 

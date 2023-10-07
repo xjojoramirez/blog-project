@@ -38,9 +38,9 @@
                     </div>
                     <div class="col-4">
                         {% if current_user.profile_pic %}
-                            <img class="float-end" src="{{ url_for('static', filename='images/'+ current_user.profile_pic) }}" width="150">
+                            <img class="float-end" src="{{ url_for('static', filename='images/user/'+ current_user.profile_pic) }}" width="150">
                         {% else %}
-                            <img class="float-end" src="{{ url_for('static', filename='images/default_profile.png') }}" width="150">
+                            <img class="float-end" src="{{ url_for('static', filename='images/user/default_profile.png') }}" width="150">
                         {% endif %}
                     </div>
                    
